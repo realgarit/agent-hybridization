@@ -25,7 +25,7 @@ Follow the instructions in [AGENTS.md](../../AGENTS.md) at the repository root. 
 ## Cross-agent conventions
 
 - This file (`AGENTS.md`) is the single source of truth for agent instructions in this repo. `CLAUDE.md` and `.github/copilot-instructions.md` are pointers to it — never edit them, never duplicate content into them.
-- Reusable skills live in `.claude/skills/` (one folder per skill with a `SKILL.md`). GitHub Copilot reads that directory natively; Codex sees it via the `.agents/skills` symlink. New skills always go in `.claude/skills/`.
+- Shared repository skills live in `.agents/skills/` (one folder per skill with a `SKILL.md`); Codex scans this location natively. Keep any `.claude/skills/` compatibility bridge pointer-only or generated from this directory. New shared skills always go in `.agents/skills/`.
 - Claude-specific subagent definitions live in `.claude/agents/`. If you are not Claude Code, you may read them as role/process guidance.
 - Session continuity across tools: before ending substantial work in ANY tool (Claude Code, Codex, Copilot), record durable context — decisions made, gotchas discovered, in-progress state worth resuming — in the "Working notes" section below, or fold it into the relevant section above. This is the shared memory between agents.
 
@@ -46,11 +46,12 @@ Follow the instructions in [AGENTS.md](../../AGENTS.md) at the repository root. 
    - If a `.codex/` dir contains instruction-like markdown: merge unique content into AGENTS.md, leave the `.codex/` dir itself in place otherwise untouched.
    - Append template T3 at the end of AGENTS.md (skip if an identical "Cross-agent conventions" section already exists).
    - Near the top of AGENTS.md (right under the H1), add this one-liner if not present:
-     `> Canonical instructions for all coding agents (Claude Code, Codex, GitHub Copilot). Claude loads this via the CLAUDE.md stub.`
+     `> Canonical instructions for all coding agents (Claude Code, Codex, GitHub Copilot). Codex reads this directly; Claude and GitHub Copilot use pointer files when present.`
 4. Write CLAUDE.md with template T1 exactly (create it even if it never existed).
-5. Skills bridge — ONLY if `.claude/skills/` exists on disk:
-   - `mkdir -p .agents && ln -s ../.claude/skills .agents/skills` (skip if already there; verify with `ls -la .agents/`).
-   - Stage the symlink only if `.claude/skills` is tracked by git (`git ls-files .claude/skills` non-empty). If untracked, leave the symlink untracked too.
+5. Skills layout:
+   - Create `.agents/skills/` as the checked-in Codex-native repository skill directory.
+   - Move shared skills from legacy `.claude/skills/` or another repository skill directory into `.agents/skills/` and update active references.
+   - If Claude compatibility is needed, keep `.claude/skills/` as an untracked pointer, symlink, junction, or generated mirror of `.agents/skills/`; never maintain two independent sources.
 6. Commit: stage ONLY the files this procedure touched (`git add AGENTS.md CLAUDE.md` plus pointer/symlink files as applicable; if you used `git mv` the rename is already staged). NEVER `git add -A` / `git add .`.
    - Do not change any git config. The repo's existing user.name/user.email must be used as-is.
    - Commit message:
@@ -59,7 +60,7 @@ Follow the instructions in [AGENTS.md](../../AGENTS.md) at the repository root. 
 
      AGENTS.md is now the single source of truth for Claude Code, OpenAI
      Codex, and GitHub Copilot. CLAUDE.md and copilot-instructions.md are
-     pointers; .agents/skills symlinks to .claude/skills for Codex.
+     pointers; .agents/skills is the Codex-native canonical skill directory.
 
      Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
      ```
