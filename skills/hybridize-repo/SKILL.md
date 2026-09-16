@@ -14,8 +14,8 @@ Goal: the repo reads identically in Claude Code, OpenAI Codex, and GitHub Copilo
 | `AGENTS.md` | Canonical instructions (all three tools read it natively) |
 | `CLAUDE.md` | 2-line stub: `@AGENTS.md` import (see templates/CLAUDE.md.stub) |
 | `.github/copilot-instructions.md` | Thin pointer, only if the file already existed (templates/copilot-instructions.md) |
-| `.claude/skills/` | Canonical skills dir (Copilot reads it natively) |
-| `.agents/skills` | Relative symlink `../.claude/skills` so Codex sees the same skills |
+| `.agents/skills/` | Canonical repository-local skills directory scanned by Codex |
+| `.claude/skills/` | Optional pointer, symlink, junction, or generated compatibility mirror |
 
 ## Procedure
 
@@ -24,10 +24,10 @@ Goal: the repo reads identically in Claude Code, OpenAI Codex, and GitHub Copilo
    - CLAUDE.md with real content → move it into AGENTS.md (`git mv` if AGENTS.md absent; merge unique content mechanically if both exist — never rewrite the user's prose).
    - `.github/copilot-instructions.md` with real content → migrate unique content into AGENTS.md, then replace the file with the pointer template.
    - Neither exists → write a minimal AGENTS.md: `# <repo> — Agent instructions`, then a 5–15 line factual overview from README/manifest/tree. Don't pad, don't invent.
-   - Under the H1 add: `> Canonical instructions for all coding agents (Claude Code, Codex, GitHub Copilot). Claude loads this via the CLAUDE.md stub.`
+   - Under the H1 add: `> Canonical instructions for all coding agents (Claude Code, Codex, GitHub Copilot). Codex reads this directly; Claude and GitHub Copilot use pointer files when present.`
    - Append the cross-agent block (templates/cross-agent-block.md) at the end, unless already present.
 3. Write `CLAUDE.md` from templates/CLAUDE.md.stub (always, even if none existed).
-4. If `.claude/skills/` exists: `mkdir -p .agents && ln -s ../.claude/skills .agents/skills` (skip if present). Stage the symlink only if `.claude/skills` is git-tracked.
+4. Create or preserve `.agents/skills/` as the checked-in Codex-native repository skill directory. Move legacy `.claude/skills/` content into it. If Claude compatibility is needed, keep `.claude/skills/` only as a pointer, symlink, junction, or generated mirror of `.agents/skills/`; never maintain two independent sources.
 5. Commit ONLY the touched files (never `git add -A`). Respect the repo's existing git identity — never change git config. Message: `chore: hybridize agent instructions (AGENTS.md canonical)`.
 6. Push to the current branch; if rejected by branch policy, push the commit as `chore/agent-hybridization` and tell the user a PR is needed.
 
